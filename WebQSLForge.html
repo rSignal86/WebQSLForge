@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebQSLForge - ADIF to manager, the easy way</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&family=Special+Elite&family=VT323&display=swap" rel="stylesheet">
+    
+    <style>
+        body { margin:0; font-family: 'Segoe UI', sans-serif; background:#eef2f5; color: #333; overflow: hidden; }
+        .wrapper { display:flex; height:100vh; }
+        .sidebar { width:360px; background:#fff; padding:15px; overflow-y:auto; border-right:1px solid #ccc; font-size: 0.85em; }
+        .section { margin-bottom:15px; padding-bottom:10px; border-bottom: 1px solid #eee; }
+        .section h3 { margin:0 0 8px 0; color:#2c3e50; font-size: 1.1em; }
+        input, select { width:100%; padding:8px; margin-bottom:8px; border: 1px solid #ddd; border-radius:4px; box-sizing:border-box; }
+        button { width:100%; padding:10px; margin:4px 0; background:#2980b9; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; }
+        button:hover { background:#1f6391; }
+        .btn-wiki { background: #f1c40f; color: #000; border: 1px solid #d4ac0d; margin-bottom: 10px; }
+        label { display:block; margin:6px 0 2px; font-weight:bold; }
+        .main { flex:1; display:flex; flex-direction:column; background: #555; min-width: 0; }
+        .preview-container { flex: 0 0 50%; display:flex; justify-content:center; align-items:center; padding:10px; background: #333; overflow: hidden; }
+        canvas { background:#fff; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 95%; max-height: 95%; object-fit: contain; }
+        .table-area { flex:1; background:#fff; overflow:auto; border-top:2px solid #222; }
+        table { width:100%; border-collapse:collapse; font-size:11px; min-width: 1000px; }
+        th { background:#f8f9fa; position: sticky; top: 0; padding: 10px 8px; border-bottom: 2px solid #ddd; text-align: left; z-index: 10; }
+        td { padding:6px 8px; border-bottom: 1px solid #eee; }
+        tr:hover { background: #f1f7ff; cursor: pointer; }
+        .selected-row { background: #e3f2fd !important; }
+        .status-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; display: inline-block; font-weight: bold; }
+        .status-ok { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(3px); }
+        .modal-content { background: #fff; margin: 5% auto; padding: 25px; width: 60%; border-radius: 8px; max-height: 80vh; overflow-y: auto; }
+        .close { float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="wikiModal" class="modal">
+    <div class="modal-content" style="max-width: 850px; line-height: 1.6; color: #333; border-radius: 12px; padding: 30px;">
+        <span class="close" onclick="document.getElementById('wikiModal').style.display='none'" style="font-size: 35px;">&times;</span>
+        
+        <div style="text-align: center; border-bottom: 3px solid #2980b9; margin-bottom: 25px; padding-bottom: 15px;">
+            <h1 style="margin: 0; color: #2c3e50; font-size: 2em;">📜 WebQSLForge User Manual</h1>
+            <p style="font-style: italic; color: #7f8c8d; margin-top: 5px;">ADIF to manager, the easy way</p>
+        </div>
+
+        <div style="background: #f4f7f9; padding: 20px; border-left: 6px solid #27ae60; margin-bottom: 30px; border-radius: 4px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);">
+            <p style="margin: 0; font-size: 1.1em; color: #2c3e50; font-weight: 500; line-height: 1.5;">
+                <strong>The intention</strong> of this program is to provide a simple method for creating QSL cards directly from an ADIF file. The program requires an internet connection to sync prefixes. Since it's a standalone HTML file, it works seamlessly on Windows, Mac, and Linux, as well as on your personal or club website. This tool was made with love by an amateur for amateurs, with simplicity and intuitiveness in focus. By utilizing the ADIF 3.1.6 standard, it bridges the gap between digital logging and physical card exchange so you can make QSL card the easy way With this program you can make the cards and print them and it will be sorted for you to.
+            </p>
+        </div>
+
+ 	<div style="background: #f4f7f9; padding: 20px; border-left: 6px solid #27ae60; margin-bottom: 30px; border-radius: 4px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);">
+            <p style="margin: 0; font-size: 1.1em; color: #2c3e50; font-weight: 500; line-height: 1.5;">
+                <strong>So how do you use it? </strong>That is very Easy... Start by uploading a background image for your card and an ADIF file containing your QSOs using the menu on the left. Once loaded, all contacts will appear in
+			the table below, and you can click any row to preview that specific QSL card.
+			Customize your card by entering your station details, choosing a font, and adjusting colors, transparency, and borders. You can drag text elements directly on the preview to position them, and use the scroll 			wheel to resize them. The background image can also be zoomed, moved, and rotated with your mouse. When everything looks right, export your QSL cards to a PDF with a single click. The cards are automatically 			sorted with the power and the automatic collaboration of QSL BY BUREAU before you printing it out</p>
+        </div>
+	<div style="background: #f4f7f9; padding: 20px; border-left: 6px solid #27ae60; margin-bottom: 30px; border-radius: 4px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);">
+            <p style="margin: 0; font-size: 1.1em; color: #2c3e50; font-weight: 500; line-height: 1.5;">
+                <strong>Are we GDPR Compliant? </strong>YES... WebQSLForge is designed with privacy in mind and is, by default, GDPR compliant. The application runs locally in your browser and does not collect, store, or transmit personal data to external servers. All ADIF log data and user inputs remain on your own device. The only external requests made by the application are for publicly available prefix data (used for sorting and country identification) and for loading fonts from Google Fonts to ensure proper visual styling. PDF generation is handled locally within your browser and does not involve any data being sent externally. No personal or sensitive information is intentionally shared, stored, or processed outside of your local environment. No Data Processing Agreement is needed on our end.</p>
+        </div>
+
+
+        <div style="background: #fffef0; border: 1px solid #f1c40f; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+            <h3 style="margin-top: 0; color: #b7950b; display: flex; align-items: center;">
+                <span style="font-size: 1.4em; margin-right: 10px;">🖱️</span> Mouse & Interaction Guide
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4 style="margin-bottom: 8px; color: #444;">On Text Elements:</h4>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li><strong>Move:</strong> Left-click and hold to drag any text box to a new position.</li>
+                        <li><strong>Resize:</strong> Hover over an element and use the <strong>Scroll Wheel</strong> to change font size.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 8px; color: #444;">On Background Image:</h4>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li><strong>Zoom:</strong> Use the <strong>Scroll Wheel</strong> on an empty area to zoom the image.</li>
+                        <li><strong>Pan:</strong> Click and hold the <strong>Right Mouse Button</strong> to slide the image.</li>
+                        <li><strong>Rotate:</strong> Click and hold the <strong>Middle Mouse Button</strong> to rotate the image.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="document.getElementById('wikiModal').style.display='none'" style="background:#27ae60; padding: 15px;">Got it, let's forge!</button>
+    </div>
+</div>
+
+<div class="wrapper">
+    <div class="sidebar">
+        <button class="btn-wiki" onclick="document.getElementById('wikiModal').style.display='block'">❓ OPEN HELP / WIKI</button>
+
+        <div class="section">
+            <h3>1. Files & Fonts</h3>
+            <label>Background</label>
+            <input type="file" id="bgFile" accept="image/*">
+            <label>ADIF Log</label>
+            <input type="file" id="adifFile" accept=".adi,.adif">
+            <label>Font</label>
+            <select id="fontFamily">
+                <option value="'Roboto Mono', monospace">Roboto Mono</option>
+                <option value="'Special Elite', serif">Old Typewriter</option>
+                <option value="'VT323', monospace">Classic Radio</option>
+            </select>
+        </div>
+
+        <div class="section">
+            <h3>2. My Station</h3>
+            <input id="stationCall" placeholder="Callsign" value="LBnxx - Strange Name">
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
+                <input id="myGrid" placeholder="Grid" value="JP9">
+                <input id="myITU" placeholder="ITU" value="18">
+                <input id="myCQ" placeholder="CQ" value="14">
+            </div>
+            <input id="personalMsg" placeholder="Personal Message" value="73 de  , Norway">
+        </div>
+
+        <div class="section">
+            <h3>3. Style & Colors</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div><label>Labels</label><input type="color" id="textColor" value="#000000"></div>
+                <div><label>Data</label><input type="color" id="dataTextColor" value="#d35400"></div>
+            </div>
+            <label>Box Opacity (%)</label>
+            <input type="range" id="boxOpacity" min="0" max="100" value="85">
+        </div>
+
+        <div class="section">
+            <h3>4. Border</h3>
+            <select id="borderStyle">
+                <option value="none">No Border</option>
+                <option value="solid" selected>Solid Line</option>
+                <option value="dashed">Dashed Line</option>
+            </select>
+            <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px; margin-top:5px;">
+                <input type="color" id="borderColor" value="#000000">
+                <input type="number" id="borderWidth" value="5" min="1">
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>5. Tools</h3>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                <input type="checkbox" id="sortBureau" style="width:auto; margin:0;" onchange="refreshLog()">
+                <label style="margin:0;">Bureau Only / Sort</label>
+            </div>
+            <div id="prefixStatus" class="status-badge status-ok">Syncing...</div>
+            <button id="generatePDF" style="background: #27ae60;">SAVE TABLE TO PDF</button>
+            <button id="resetLayout" style="background: #7f8c8d;">Reset Layout</button>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="preview-container"><canvas id="canvas" width="1400" height="900"></canvas></div>
+        <div class="table-area">
+            <table id="qsoTable">
+                <thead><tr><th>#</th><th>Call</th><th>Country</th><th>Date</th><th>UTC</th><th>Mode</th><th>MHz</th><th>RST</th><th>Comment</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+let qsoRecords = [], backupRecords = [], backgroundImage = null;
+let activeRecord = { call: "CALL", qso_date: "20260322", time_on: "1522", mode: "FT8", freq: "145.500", rst_sent: "599", comment: "comment from qso", country: "Norway" };
+let prefixData = null;
+const PREFIX_URL = "https://raw.githubusercontent.com/rSignal86/QSL-BY-BUREAU/main/data/prefixList.json";
+
+const bgTransform = { x: 700, y: 450, scale: 1.0, rotation: 0 };
+const DEFAULT_LAYOUT = {
+    station:  { x: 80, y: 150, w: 200, h: 80, size: 90 },
+    qsoLine:  { x: 80, y: 300, w: 500, h: 50, size: 50 },
+    qsoTable: { x: 100, y: 550, w: 1000, h: 100, size: 45 },
+    comment:  { x: 100, y: 680, w: 400, h: 30, size: 30 },
+    footer:   { x: 50, y: 850, w: 400, h: 30, size: 35 },
+    personal: { x: 80, y: 750, w: 300, h: 35, size: 35 }
+};
+let currentLayout = JSON.parse(JSON.stringify(DEFAULT_LAYOUT));
+const canvas = document.getElementById("canvas"), ctx = canvas.getContext("2d");
+
+const formatDate = (d) => (d && d.length === 8) ? `${d.substring(6,8)}.${d.substring(4,6)}.${d.substring(0,4)}` : d;
+
+async function fetchPrefixData() {
+    try {
+        const r = await fetch(PREFIX_URL + `?v=${Date.now()}`);
+        prefixData = await r.json();
+        document.getElementById("prefixStatus").textContent = `Sorting is syncked with github.com/rSignal86/QSL-BY-BUREAU `;
+        if (backupRecords.length > 0) refreshLog();
+    } catch (e) { document.getElementById("prefixStatus").textContent = "Offline: Unable to synck with github.com/rSignal86/QSL-BY-BUREAU"; }
+}
+
+function getCountry(call) {
+    if(!prefixData) return { name: "Unknown", bureau: true };
+    let c = call.toUpperCase().replace(/[^A-Z0-9]/g,'');
+    for(let i=4; i>=1; i--) {
+        let p = c.substring(0,i);
+        for(let name in prefixData.countries) {
+            if(prefixData.countries[name].prefixes.includes(p)) return { name, bureau: prefixData.countries[name].hasQSLSortService };
+        }
+    }
+    return { name: "Unknown", bureau: true };
+}
+
+function refreshLog() {
+    qsoRecords = document.getElementById("sortBureau").checked 
+        ? backupRecords.filter(q => getCountry(q.call).bureau !== false).sort((a,b) => a.country.localeCompare(b.country) || a.call.localeCompare(b.call))
+        : [...backupRecords];
+    renderTable(); 
+    if(qsoRecords.length > 0) activeRecord = qsoRecords[0];
+    updatePreview();
+}
+
+function renderTable() {
+    const tbody = document.querySelector("#qsoTable tbody");
+    tbody.innerHTML = qsoRecords.map((q, i) => `<tr onclick="setActive(${i})" class="${activeRecord === q ? 'selected-row' : ''}"><td>${i+1}</td><td><b>${q.call}</b></td><td>${q.country}</td><td>${formatDate(q.qso_date)}</td><td>${q.time_on}</td><td>${q.mode}</td><td>${q.freq}</td><td>${q.rst_sent}</td><td>${q.comment}</td></tr>`).join("");
+}
+
+function setActive(i) { activeRecord = qsoRecords[i]; renderTable(); updatePreview(); }
+
+function updatePreview() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (backgroundImage) {
+        ctx.save();
+        ctx.translate(bgTransform.x, bgTransform.y); ctx.rotate(bgTransform.rotation); ctx.scale(bgTransform.scale, bgTransform.scale);
+        ctx.drawImage(backgroundImage, -canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
+        ctx.restore();
+    } else { ctx.fillStyle = "#fff"; ctx.fillRect(0,0,canvas.width,canvas.height); }
+
+    const font = document.getElementById("fontFamily").value;
+    const lColor = document.getElementById("textColor").value;
+    const dColor = document.getElementById("dataTextColor").value;
+    const op = document.getElementById("boxOpacity").value / 100;
+
+    const drawItem = (key, text, isTable = false) => {
+        const el = currentLayout[key];
+        ctx.font = `bold ${el.size}px ${font}`;
+        if (!isTable) {
+            const m = ctx.measureText(text);
+            el.w = m.width; el.h = el.size;
+            ctx.save(); ctx.globalAlpha = op; ctx.fillStyle = "#fff";
+            ctx.fillRect(el.x - 20, el.y - el.size, el.w + 40, el.size + 20); ctx.restore();
+            ctx.fillStyle = lColor; ctx.fillText(text, el.x, el.y);
+        } else {
+            const heads = ["Date", "UTC", "MHz", "MODE", "RST"];
+            const sc = el.size / 45;
+            const vals = [formatDate(activeRecord.qso_date), activeRecord.time_on, activeRecord.freq, activeRecord.mode, activeRecord.rst_sent];
+            const offsets = [0, 280, 480, 680, 1100].map(v => v * sc);
+            el.w = offsets[4] + ctx.measureText(vals[4]).width; 
+            ctx.save(); ctx.globalAlpha = op; ctx.fillStyle = "#fff";
+            ctx.fillRect(el.x - 20, el.y - 110 * sc, el.w + 40, el.size + 90 * sc); ctx.restore();
+            heads.forEach((h, i) => {
+                ctx.fillStyle = "#444"; ctx.font = `bold ${22*sc}px ${font}`; ctx.fillText(h, el.x + offsets[i], el.y - 80 * sc);
+                ctx.fillStyle = dColor; ctx.font = `bold ${el.size}px ${font}`; ctx.fillText(vals[i], el.x + offsets[i], el.y - 20 * sc);
+            });
+        }
+    };
+
+    drawItem('station', document.getElementById("stationCall").value);
+    drawItem('qsoLine', "Confirming QSO with: " + activeRecord.call);
+    drawItem('qsoTable', "", true);
+    if(activeRecord.comment) drawItem('comment', "Note: " + activeRecord.comment);
+    if(document.getElementById("personalMsg").value) drawItem('personal', document.getElementById("personalMsg").value);
+
+    let ft = [];
+    if(document.getElementById("myGrid").value) ft.push("Grid: " + document.getElementById("myGrid").value);
+    if(document.getElementById("myITU").value) ft.push("ITU: " + document.getElementById("myITU").value);
+    if(document.getElementById("myCQ").value) ft.push("CQ: " + document.getElementById("myCQ").value);
+    if(ft.length > 0) drawItem('footer', ft.join(" | "));
+
+    const bStyle = document.getElementById("borderStyle").value;
+    if (bStyle !== "none") {
+        ctx.strokeStyle = document.getElementById("borderColor").value;
+        ctx.lineWidth = parseInt(document.getElementById("borderWidth").value) * 2;
+        if(bStyle === "dashed") ctx.setLineDash([40, 20]); else ctx.setLineDash([]);
+        ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, canvas.width - ctx.lineWidth, canvas.height - ctx.lineWidth);
+    }
+}
+
+document.getElementById("adifFile").onchange = (e) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        backupRecords = ev.target.result.split(/<eor>/i).filter(r => r.length > 20).map((entry, idx) => {
+            const fields = {}; const regex = /<(\w+):?(\d+)?(?::\w)?>([^<]*)/gi; let m;
+            while ((m = regex.exec(entry)) !== null) fields[m[1].toLowerCase()] = m[3].trim();
+            if(!fields.call) return null;
+            return { call: fields.call.toUpperCase(), country: getCountry(fields.call).name, qso_date: fields.qso_date||"", time_on: fields.time_on||"", mode: fields.mode||"", rst_sent: fields.rst_sent||"", freq: fields.freq||"", comment: fields.comment||fields.notes||"" };
+        }).filter(q => q !== null);
+        refreshLog();
+    };
+    reader.readAsText(e.target.files[0]);
+};
+
+let dragKey = null, dOff = {x:0,y:0}, isP = false, isR = false, lM = {x:0,y:0};
+canvas.onmousedown = e => {
+    const r = canvas.getBoundingClientRect(), s = canvas.width/r.width, mx = (e.clientX-r.left)*s, my = (e.clientY-r.top)*s;
+    lM = {x:mx, y:my};
+    if(e.button === 2) isP = true; else if(e.button === 1) isR = true;
+    else { for(let k in currentLayout) { let el = currentLayout[k]; if(mx >= el.x-50 && mx <= el.x+el.w+50 && my >= el.y-el.h-50 && my <= el.y+50) { dragKey = k; dOff = {x:mx-el.x, y:my-el.y}; return; } } }
+};
+window.onmousemove = e => {
+    const r = canvas.getBoundingClientRect(), s = canvas.width/r.width, mx = (e.clientX-r.left)*s, my = (e.clientY-r.top)*s;
+    if(isP) { bgTransform.x += (mx-lM.x); bgTransform.y += (my-lM.y); }
+    else if(isR) { bgTransform.rotation += (mx-lM.x)*0.01; }
+    else if(dragKey) { currentLayout[dragKey].x = mx-dOff.x; currentLayout[dragKey].y = my-dOff.y; }
+    lM = {x:mx, y:my}; if(isP || isR || dragKey) updatePreview();
+};
+window.onmouseup = () => { dragKey = null; isP = isR = false; };
+canvas.onwheel = e => {
+    e.preventDefault(); const r = canvas.getBoundingClientRect(), s = canvas.width/r.width, mx = (e.clientX-r.left)*s, my = (e.clientY-r.top)*s;
+    let hit = false; for(let k in currentLayout) { let el = currentLayout[k]; if(mx >= el.x-50 && mx <= el.x+el.w+50 && my >= el.y-el.h-50 && my <= el.y+50) { currentLayout[k].size = Math.max(10, currentLayout[k].size + (e.deltaY>0?-3:3)); hit = true; break; } }
+    if(!hit) bgTransform.scale = Math.max(0.1, bgTransform.scale + (e.deltaY>0?-0.05:0.05)); updatePreview();
+};
+
+document.getElementById("bgFile").onchange = e => {
+    const fr = new FileReader(); fr.onload = ev => { backgroundImage = new Image(); backgroundImage.onload = updatePreview; backgroundImage.src = ev.target.result; }; fr.readAsDataURL(e.target.files[0]);
+};
+
+document.getElementById("generatePDF").onclick = () => {
+    if(qsoRecords.length === 0) return alert("No QSOs loaded!");
+    const { jsPDF } = window.jspdf; const doc = new jsPDF("l", "mm", "a4");
+    qsoRecords.forEach((record, i) => {
+        if(i > 0 && i % 4 === 0) doc.addPage();
+        activeRecord = record; updatePreview();
+        const x = 8.5 + (i%2)*140, y = 15 + Math.floor((i%4)/2)*90;
+        doc.addImage(canvas.toDataURL("image/jpeg", 0.8), "JPEG", x, y, 140, 90);
+    });
+    doc.save("WebQSLForge - PLEASE PRINT ME.pdf");
+};
+
+document.getElementById("resetLayout").onclick = () => { currentLayout = JSON.parse(JSON.stringify(DEFAULT_LAYOUT)); updatePreview(); };
+document.querySelectorAll("input, select").forEach(el => el.oninput = () => setTimeout(updatePreview, 10));
+window.onload = () => { fetchPrefixData(); updatePreview(); };
+</script>
+</body>
+</html>
