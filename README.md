@@ -1,8 +1,7 @@
 # WebQSLForge  
 **ADIF → ready-to-print QSL cards, the lazy way™**
 
-![WebQSLForge in action](https://via.placeholder.com/800x400/2c3e50/ffffff?text=WebQSLForge+-+QSL+Made+Too+Easy)  
-*(replace with a real screenshot when you feel like it)*
+![Image alt](https://github.com/rSignal86/WebQSLForge/blob/main/screenshot.png)
 
 ## What is this thing?
 
