@@ -3,35 +3,56 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebQSLForge - ADIF to manager, the easy way</title>
+    <title>WebQSLForge - ADIF to Manager</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&family=Special+Elite&family=VT323&display=swap" rel="stylesheet">
     
     <style>
+        /* Base UI Styles */
         body { margin:0; font-family: 'Segoe UI', sans-serif; background:#eef2f5; color: #333; overflow: hidden; }
         .wrapper { display:flex; height:100vh; }
+        
+        /* Sidebar Styling */
         .sidebar { width:360px; background:#fff; padding:15px; overflow-y:auto; border-right:1px solid #ccc; font-size: 0.85em; }
         .section { margin-bottom:15px; padding-bottom:10px; border-bottom: 1px solid #eee; }
         .section h3 { margin:0 0 8px 0; color:#2c3e50; font-size: 1.1em; }
-        input, select { width:100%; padding:8px; margin-bottom:8px; border: 1px solid #ddd; border-radius:4px; box-sizing:border-box; }
-        button { width:100%; padding:10px; margin:4px 0; background:#2980b9; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; }
-        button:hover { background:#1f6391; }
-        .btn-wiki { background: #f1c40f; color: #000; border: 1px solid #d4ac0d; margin-bottom: 10px; }
+        
+        /* Form Elements Styling */
         label { display:block; margin:6px 0 2px; font-weight:bold; }
+        input, select { width:100%; padding:8px; margin-bottom:8px; border: 1px solid #ddd; border-radius:4px; box-sizing:border-box; font-family: inherit; }
+        
+        /* Grouped Container for Filter Tools */
+        .input-group { background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
+        .input-group label { font-size: 0.8em; color: #555; text-transform: uppercase; }
+
+        button { width:100%; padding:10px; margin:4px 0; background:#2980b9; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; transition: background 0.2s; }
+        button:hover { background:#1f6391; }
+        
+        .btn-wiki { background: #f1c40f; color: #000; border: 1px solid #d4ac0d; margin-bottom: 10px; }
+        .btn-reset { background: #e74c3c; font-size: 0.75em; padding: 4px; margin-top: 5px; }
+
+        /* Multi-select and Filter Helpers */
+        select[multiple] { height: 100px; }
+        .filter-hint { font-size: 0.8em; color: #666; margin-top: -5px; margin-bottom: 10px; }
+
+        /* Main Workspace */
         .main { flex:1; display:flex; flex-direction:column; background: #555; min-width: 0; }
-        .preview-container { flex: 0 0 50%; display:flex; justify-content:center; align-items:center; padding:10px; background: #333; overflow: hidden; }
-        canvas { background:#fff; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 95%; max-height: 95%; object-fit: contain; }
+        .preview-container { flex: 0 0 55%; display:flex; justify-content:center; align-items:center; padding:10px; background: #333; overflow: hidden; }
+        canvas { background:#fff; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 95%; max-height: 95%; object-fit: contain; cursor: move; }
+        
+        /* Result Table Area */
         .table-area { flex:1; background:#fff; overflow:auto; border-top:2px solid #222; }
         table { width:100%; border-collapse:collapse; font-size:11px; min-width: 1000px; }
         th { background:#f8f9fa; position: sticky; top: 0; padding: 10px 8px; border-bottom: 2px solid #ddd; text-align: left; z-index: 10; }
         td { padding:6px 8px; border-bottom: 1px solid #eee; }
         tr:hover { background: #f1f7ff; cursor: pointer; }
         .selected-row { background: #e3f2fd !important; }
-        .status-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; display: inline-block; font-weight: bold; }
+
+        .status-badge { font-size: 10px; padding: 4px 8px; border-radius: 4px; display: block; font-weight: bold; text-align: center; margin-top: 5px; }
         .status-ok { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 
-        /* Modal Styles */
+        /* Modal / Help UI */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(3px); }
-        .modal-content { background: #fff; margin: 5% auto; padding: 25px; width: 60%; border-radius: 8px; max-height: 80vh; overflow-y: auto; }
+        .modal-content { background: #fff; margin: 5% auto; padding: 30px; width: 60%; border-radius: 12px; max-height: 85vh; overflow-y: auto; }
         .close { float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
@@ -45,7 +66,6 @@
             <h1 style="margin: 0; color: #2c3e50; font-size: 2em;">📜 WebQSLForge User Manual</h1>
             <p style="font-style: italic; color: #7f8c8d; margin-top: 5px;">ADIF to manager, the easy way</p>
         </div>
-
         <div style="background: #f4f7f9; padding: 20px; border-left: 6px solid #27ae60; margin-bottom: 30px; border-radius: 4px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);">
             <p style="margin: 0; font-size: 1.1em; color: #2c3e50; font-weight: 500; line-height: 1.5;">
                 <strong>The intention</strong> of this program is to provide a simple method for creating QSL cards directly from an ADIF file. The program requires an internet connection to sync prefixes. Since it's a standalone HTML file, it works seamlessly on Windows, Mac, and Linux, as well as on your personal or club website. This tool was made with love by an amateur for amateurs, with simplicity and intuitiveness in focus. By utilizing the ADIF 3.1.6 standard, it bridges the gap between digital logging and physical card exchange so you can make QSL card the easy way With this program you can make the cards and print them and it will be sorted for you to.
@@ -62,8 +82,6 @@
             <p style="margin: 0; font-size: 1.1em; color: #2c3e50; font-weight: 500; line-height: 1.5;">
                 <strong>Are we GDPR Compliant? </strong>YES... WebQSLForge is designed with privacy in mind and is, by default, GDPR compliant. The application runs locally in your browser and does not collect, store, or transmit personal data to external servers. All ADIF log data and user inputs remain on your own device. The only external requests made by the application are for publicly available prefix data (used for sorting and country identification) and for loading fonts from Google Fonts to ensure proper visual styling. PDF generation is handled locally within your browser and does not involve any data being sent externally. No personal or sensitive information is intentionally shared, stored, or processed outside of your local environment. No Data Processing Agreement is needed on our end.</p>
         </div>
-
-
         <div style="background: #fffef0; border: 1px solid #f1c40f; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
             <h3 style="margin-top: 0; color: #b7950b; display: flex; align-items: center;">
                 <span style="font-size: 1.4em; margin-right: 10px;">🖱️</span> Mouse & Interaction Guide
@@ -87,21 +105,30 @@
             </div>
         </div>
 
-        <button onclick="document.getElementById('wikiModal').style.display='none'" style="background:#27ae60; padding: 15px;">Got it, let's forge!</button>
+
+        <div style="background: #f4f7f9; padding: 15px; border-left: 5px solid #27ae60; margin: 20px 0;">
+            <h3>Core Features:</h3>
+            <ul>
+                <li><strong>Dynamic Filtering:</strong> Filter by date, time, and specific countries.</li>
+                <li><strong>Interactive Design:</strong> Drag text to move, use mouse wheel to scale.</li>
+                <li><strong>Auto-Sort:</strong> PDF export is automatically sorted by country for easy Bureau handling.</li>
+            </ul>
+        </div>
+        <button onclick="document.getElementById('wikiModal').style.display='none'" style="background:#27ae60;">Close Manual</button>
     </div>
 </div>
 
 <div class="wrapper">
     <div class="sidebar">
-        <button class="btn-wiki" onclick="document.getElementById('wikiModal').style.display='block'">❓ OPEN HELP / WIKI</button>
+        <button class="btn-wiki" onclick="document.getElementById('wikiModal').style.display='block'">❓ HELP & DOCUMENTATION</button>
 
         <div class="section">
-            <h3>1. Files & Fonts</h3>
-            <label>Background</label>
+            <h3>1. Data Sources</h3>
+            <label>Background Image</label>
             <input type="file" id="bgFile" accept="image/*">
-            <label>ADIF Log</label>
+            <label>ADIF Log File</label>
             <input type="file" id="adifFile" accept=".adi,.adif">
-            <label>Font</label>
+            <label>Card Font</label>
             <select id="fontFamily">
                 <option value="'Roboto Mono', monospace">Roboto Mono</option>
                 <option value="'Special Elite', serif">Old Typewriter</option>
@@ -110,18 +137,18 @@
         </div>
 
         <div class="section">
-            <h3>2. My Station</h3>
-            <input id="stationCall" placeholder="Callsign" value="LBnxx - Strange Name">
+            <h3>2. My Station Info</h3>
+            <input id="stationCall" placeholder="Your Callsign" value="LBnxx">
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
-                <input id="myGrid" placeholder="Grid" value="JP9">
+                <input id="myGrid" placeholder="Grid" value="JP99">
                 <input id="myITU" placeholder="ITU" value="18">
                 <input id="myCQ" placeholder="CQ" value="14">
             </div>
-            <input id="personalMsg" placeholder="Personal Message" value="73 de  , Norway">
+            <input id="personalMsg" placeholder="Custom Greeting" value="Tnx for QSO! 73">
         </div>
 
         <div class="section">
-            <h3>3. Style & Colors</h3>
+            <h3>3. Visual Style</h3>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                 <div><label>Labels</label><input type="color" id="textColor" value="#000000"></div>
                 <div><label>Data</label><input type="color" id="dataTextColor" value="#d35400"></div>
@@ -131,11 +158,11 @@
         </div>
 
         <div class="section">
-            <h3>4. Border</h3>
+            <h3>4. Card Border</h3>
             <select id="borderStyle">
-                <option value="none">No Border</option>
-                <option value="solid" selected>Solid Line</option>
-                <option value="dashed">Dashed Line</option>
+                <option value="none">None</option>
+                <option value="solid" selected>Solid</option>
+                <option value="dashed">Dashed (Cut line)</option>
             </select>
             <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px; margin-top:5px;">
                 <input type="color" id="borderColor" value="#000000">
@@ -144,14 +171,29 @@
         </div>
 
         <div class="section">
-            <h3>5. Tools</h3>
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                <input type="checkbox" id="sortBureau" style="width:auto; margin:0;" onchange="refreshLog()">
-                <label style="margin:0;">Bureau Only / Sort</label>
+            <h3>5. Tools & Filtering</h3>
+            
+            <div class="input-group">
+                <label>Date & Time Window (UTC)</label>
+                <input type="datetime-local" id="filterStart">
+                <input type="datetime-local" id="filterEnd">
+                <button class="btn-reset" onclick="clearDateTimeFilters()">Reset Time Filter</button>
             </div>
-            <div id="prefixStatus" class="status-badge status-ok">Syncing...</div>
-            <button id="generatePDF" style="background: #27ae60;">SAVE TABLE TO PDF</button>
-            <button id="resetLayout" style="background: #7f8c8d;">Reset Layout</button>
+
+            <label>Include Countries</label>
+            <select id="filterCountries" multiple>
+                <option value="ALL" selected>-- All Countries --</option>
+            </select>
+            <div class="filter-hint">Use Ctrl/Cmd + Click to select multiple.</div>
+
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                <input type="checkbox" id="sortBureau" style="width:auto; margin:0;">
+                <label style="margin:0;">Sort QSL card before generation)</label>
+            </div>
+            
+            <div id="prefixStatus" class="status-badge status-ok">Initializing prefix data...</div>
+            <button id="generatePDF" style="background: #27ae60; margin-top:10px;">EXPORT PDF (PRINT READY)</button>
+            <button id="resetLayout" style="background: #7f8c8d;">Reset Item Positions</button>
         </div>
     </div>
 
@@ -169,12 +211,21 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-let qsoRecords = [], backupRecords = [], backgroundImage = null;
-let activeRecord = { call: "CALL", qso_date: "20260322", time_on: "1522", mode: "FT8", freq: "145.500", rst_sent: "599", comment: "comment from qso", country: "Norway" };
+/**
+ * APP STATE & CONFIGURATION
+ */
+let qsoRecords = [];        // Filtered records currently shown
+let backupRecords = [];     // Full log from ADIF file
+let backgroundImage = null;
+let activeRecord = { call: "EXAMPLE", qso_date: "20260322", time_on: "1200", mode: "CW", freq: "14.000", rst_sent: "599", comment: "Keep it up!", country: "Norway" };
 let prefixData = null;
+
 const PREFIX_URL = "https://raw.githubusercontent.com/rSignal86/QSL-BY-BUREAU/main/data/prefixList.json";
 
+// Background transform states
 const bgTransform = { x: 700, y: 450, scale: 1.0, rotation: 0 };
+
+// Default UI layout positions (X, Y, Width, Height, FontSize)
 const DEFAULT_LAYOUT = {
     station:  { x: 80, y: 150, w: 200, h: 80, size: 90 },
     qsoLine:  { x: 80, y: 300, w: 500, h: 50, size: 50 },
@@ -184,64 +235,131 @@ const DEFAULT_LAYOUT = {
     personal: { x: 80, y: 750, w: 300, h: 35, size: 35 }
 };
 let currentLayout = JSON.parse(JSON.stringify(DEFAULT_LAYOUT));
-const canvas = document.getElementById("canvas"), ctx = canvas.getContext("2d");
 
-const formatDate = (d) => (d && d.length === 8) ? `${d.substring(6,8)}.${d.substring(4,6)}.${d.substring(0,4)}` : d;
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
+/**
+ * DATA INITIALIZATION
+ */
 async function fetchPrefixData() {
     try {
-        const r = await fetch(PREFIX_URL + `?v=${Date.now()}`);
-        prefixData = await r.json();
-        document.getElementById("prefixStatus").textContent = `Sorting is syncked with github.com/rSignal86/QSL-BY-BUREAU `;
-        if (backupRecords.length > 0) refreshLog();
-    } catch (e) { document.getElementById("prefixStatus").textContent = "Offline: Unable to synck with github.com/rSignal86/QSL-BY-BUREAU"; }
+        const response = await fetch(PREFIX_URL + `?v=${Date.now()}`);
+        prefixData = await response.json();
+        document.getElementById("prefixStatus").textContent = `Sorting is syncked with github.com/rSignal86/QSL-BY-BUREAU.`;
+    } catch (e) { 
+        document.getElementById("prefixStatus").textContent = "Warning: Using offline fallback."; 
+    }
 }
 
+/**
+ * Identifies country and bureau availability from callsign
+ */
 function getCountry(call) {
     if(!prefixData) return { name: "Unknown", bureau: true };
     let c = call.toUpperCase().replace(/[^A-Z0-9]/g,'');
     for(let i=4; i>=1; i--) {
         let p = c.substring(0,i);
         for(let name in prefixData.countries) {
-            if(prefixData.countries[name].prefixes.includes(p)) return { name, bureau: prefixData.countries[name].hasQSLSortService };
+            if(prefixData.countries[name].prefixes.includes(p)) {
+                return { name, bureau: prefixData.countries[name].hasQSLSortService };
+            }
         }
     }
     return { name: "Unknown", bureau: true };
 }
 
-function refreshLog() {
-    qsoRecords = document.getElementById("sortBureau").checked 
-        ? backupRecords.filter(q => getCountry(q.call).bureau !== false).sort((a,b) => a.country.localeCompare(b.country) || a.call.localeCompare(b.call))
-        : [...backupRecords];
+/**
+ * FILTERING LOGIC
+ */
+function clearDateTimeFilters() {
+    document.getElementById("filterStart").value = "";
+    document.getElementById("filterEnd").value = "";
+    applyFilters();
+}
+
+function populateCountryList() {
+    const selector = document.getElementById("filterCountries");
+    const uniqueCountries = [...new Set(backupRecords.map(q => q.country))].sort();
+    
+    selector.innerHTML = '<option value="ALL" selected>-- All Countries --</option>';
+    uniqueCountries.forEach(country => {
+        const opt = document.createElement("option");
+        opt.value = country;
+        opt.textContent = country;
+        selector.appendChild(opt);
+    });
+}
+
+/**
+ * Main filtering engine. Combines Date, Time, Country and Bureau status.
+ */
+function applyFilters() {
+    const startVal = document.getElementById("filterStart").value; 
+    const endVal = document.getElementById("filterEnd").value;
+    const selectedCountries = Array.from(document.getElementById("filterCountries").selectedOptions).map(o => o.value);
+    const bureauOnly = document.getElementById("sortBureau").checked;
+
+    // Helper to convert ADIF date/time strings to ISO for comparison
+    const toIso = (d, t) => {
+        if (!d || d.length < 8) return "";
+        const time = t ? t.substring(0,4) : "0000";
+        return `${d.substring(0,4)}-${d.substring(4,6)}-${d.substring(6,8)}T${time.substring(0,2)}:${time.substring(2,4)}`;
+    };
+
+    qsoRecords = backupRecords.filter(q => {
+        // Check Bureau status
+        if (bureauOnly && getCountry(q.call).bureau === false) return false;
+
+        // Check Country selection
+        if (selectedCountries.length > 0 && !selectedCountries.includes("ALL")) {
+            if (!selectedCountries.includes(q.country)) return false;
+        }
+
+        // Check Date Range
+        const qsoStamp = toIso(q.qso_date, q.time_on);
+        if (startVal && qsoStamp < startVal) return false;
+        if (endVal && qsoStamp > endVal) return false;
+
+        return true;
+    });
+
+    // Auto-sort by Country then Callsign (Essential for Bureau bundles)
+    qsoRecords.sort((a,b) => a.country.localeCompare(b.country) || a.call.localeCompare(b.call));
+    
     renderTable(); 
     if(qsoRecords.length > 0) activeRecord = qsoRecords[0];
     updatePreview();
 }
 
-function renderTable() {
-    const tbody = document.querySelector("#qsoTable tbody");
-    tbody.innerHTML = qsoRecords.map((q, i) => `<tr onclick="setActive(${i})" class="${activeRecord === q ? 'selected-row' : ''}"><td>${i+1}</td><td><b>${q.call}</b></td><td>${q.country}</td><td>${formatDate(q.qso_date)}</td><td>${q.time_on}</td><td>${q.mode}</td><td>${q.freq}</td><td>${q.rst_sent}</td><td>${q.comment}</td></tr>`).join("");
-}
-
-function setActive(i) { activeRecord = qsoRecords[i]; renderTable(); updatePreview(); }
-
+/**
+ * CANVAS RENDERING
+ */
 function updatePreview() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Render background image with transform
     if (backgroundImage) {
         ctx.save();
-        ctx.translate(bgTransform.x, bgTransform.y); ctx.rotate(bgTransform.rotation); ctx.scale(bgTransform.scale, bgTransform.scale);
+        ctx.translate(bgTransform.x, bgTransform.y); 
+        ctx.rotate(bgTransform.rotation); 
+        ctx.scale(bgTransform.scale, bgTransform.scale);
         ctx.drawImage(backgroundImage, -canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
         ctx.restore();
-    } else { ctx.fillStyle = "#fff"; ctx.fillRect(0,0,canvas.width,canvas.height); }
+    } else { 
+        ctx.fillStyle = "#fff"; ctx.fillRect(0,0,canvas.width,canvas.height); 
+    }
 
     const font = document.getElementById("fontFamily").value;
     const lColor = document.getElementById("textColor").value;
     const dColor = document.getElementById("dataTextColor").value;
     const op = document.getElementById("boxOpacity").value / 100;
 
+    // Drawing helper for UI elements
     const drawItem = (key, text, isTable = false) => {
         const el = currentLayout[key];
         ctx.font = `bold ${el.size}px ${font}`;
+        
         if (!isTable) {
             const m = ctx.measureText(text);
             el.w = m.width; el.h = el.size;
@@ -249,13 +367,16 @@ function updatePreview() {
             ctx.fillRect(el.x - 20, el.y - el.size, el.w + 40, el.size + 20); ctx.restore();
             ctx.fillStyle = lColor; ctx.fillText(text, el.x, el.y);
         } else {
+            // Specialized table rendering for QSO data
             const heads = ["Date", "UTC", "MHz", "MODE", "RST"];
             const sc = el.size / 45;
             const vals = [formatDate(activeRecord.qso_date), activeRecord.time_on, activeRecord.freq, activeRecord.mode, activeRecord.rst_sent];
             const offsets = [0, 280, 480, 680, 1100].map(v => v * sc);
             el.w = offsets[4] + ctx.measureText(vals[4]).width; 
+            
             ctx.save(); ctx.globalAlpha = op; ctx.fillStyle = "#fff";
             ctx.fillRect(el.x - 20, el.y - 110 * sc, el.w + 40, el.size + 90 * sc); ctx.restore();
+            
             heads.forEach((h, i) => {
                 ctx.fillStyle = "#444"; ctx.font = `bold ${22*sc}px ${font}`; ctx.fillText(h, el.x + offsets[i], el.y - 80 * sc);
                 ctx.fillStyle = dColor; ctx.font = `bold ${el.size}px ${font}`; ctx.fillText(vals[i], el.x + offsets[i], el.y - 20 * sc);
@@ -263,47 +384,91 @@ function updatePreview() {
         }
     };
 
+    // Draw active elements
     drawItem('station', document.getElementById("stationCall").value);
     drawItem('qsoLine', "Confirming QSO with: " + activeRecord.call);
     drawItem('qsoTable', "", true);
-    if(activeRecord.comment) drawItem('comment', "Note: " + activeRecord.comment);
+    if(activeRecord.comment) drawItem('comment', "Comment: " + activeRecord.comment);
     if(document.getElementById("personalMsg").value) drawItem('personal', document.getElementById("personalMsg").value);
 
+    // Footer info
     let ft = [];
     if(document.getElementById("myGrid").value) ft.push("Grid: " + document.getElementById("myGrid").value);
     if(document.getElementById("myITU").value) ft.push("ITU: " + document.getElementById("myITU").value);
     if(document.getElementById("myCQ").value) ft.push("CQ: " + document.getElementById("myCQ").value);
     if(ft.length > 0) drawItem('footer', ft.join(" | "));
 
+    // Border rendering
     const bStyle = document.getElementById("borderStyle").value;
     if (bStyle !== "none") {
         ctx.strokeStyle = document.getElementById("borderColor").value;
         ctx.lineWidth = parseInt(document.getElementById("borderWidth").value) * 2;
-        if(bStyle === "dashed") ctx.setLineDash([40, 20]); else ctx.setLineDash([]);
+        ctx.setLineDash(bStyle === "dashed" ? [40, 20] : []);
         ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, canvas.width - ctx.lineWidth, canvas.height - ctx.lineWidth);
     }
 }
 
+/**
+ * EVENT HANDLERS
+ */
+
+// ADIF File Parser
 document.getElementById("adifFile").onchange = (e) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
-        backupRecords = ev.target.result.split(/<eor>/i).filter(r => r.length > 20).map((entry, idx) => {
+        backupRecords = ev.target.result.split(/<eor>/i).filter(r => r.length > 20).map(entry => {
             const fields = {}; const regex = /<(\w+):?(\d+)?(?::\w)?>([^<]*)/gi; let m;
             while ((m = regex.exec(entry)) !== null) fields[m[1].toLowerCase()] = m[3].trim();
             if(!fields.call) return null;
-            return { call: fields.call.toUpperCase(), country: getCountry(fields.call).name, qso_date: fields.qso_date||"", time_on: fields.time_on||"", mode: fields.mode||"", rst_sent: fields.rst_sent||"", freq: fields.freq||"", comment: fields.comment||fields.notes||"" };
+            return { 
+                call: fields.call.toUpperCase(), 
+                country: getCountry(fields.call).name, 
+                qso_date: fields.qso_date||"", 
+                time_on: fields.time_on||"", 
+                mode: fields.mode||"", 
+                rst_sent: fields.rst_sent||"", 
+                freq: fields.freq||"", 
+                comment: fields.comment||fields.notes||"" 
+            };
         }).filter(q => q !== null);
-        refreshLog();
+        populateCountryList();
+        applyFilters();
     };
     reader.readAsText(e.target.files[0]);
 };
 
+// Tool Filter Listeners
+document.querySelectorAll("#filterStart, #filterEnd, #filterCountries, #sortBureau").forEach(el => {
+    el.addEventListener('change', applyFilters);
+});
+
+// UI Table Actions
+function renderTable() {
+    const tbody = document.querySelector("#qsoTable tbody");
+    tbody.innerHTML = qsoRecords.map((q, i) => `
+        <tr onclick="setActive(${i})" class="${activeRecord === q ? 'selected-row' : ''}">
+            <td>${i+1}</td><td><b>${q.call}</b></td><td>${q.country}</td>
+            <td>${formatDate(q.qso_date)}</td><td>${q.time_on}</td><td>${q.mode}</td>
+            <td>${q.freq}</td><td>${q.rst_sent}</td><td>${q.comment}</td>
+        </tr>`).join("");
+}
+function formatDate(d) { return (d && d.length === 8) ? `${d.substring(6,8)}.${d.substring(4,6)}.${d.substring(0,4)}` : d; }
+function setActive(i) { activeRecord = qsoRecords[i]; renderTable(); updatePreview(); }
+
+// Canvas Drag & Move Logic
 let dragKey = null, dOff = {x:0,y:0}, isP = false, isR = false, lM = {x:0,y:0};
 canvas.onmousedown = e => {
     const r = canvas.getBoundingClientRect(), s = canvas.width/r.width, mx = (e.clientX-r.left)*s, my = (e.clientY-r.top)*s;
     lM = {x:mx, y:my};
     if(e.button === 2) isP = true; else if(e.button === 1) isR = true;
-    else { for(let k in currentLayout) { let el = currentLayout[k]; if(mx >= el.x-50 && mx <= el.x+el.w+50 && my >= el.y-el.h-50 && my <= el.y+50) { dragKey = k; dOff = {x:mx-el.x, y:my-el.y}; return; } } }
+    else { 
+        for(let k in currentLayout) { 
+            let el = currentLayout[k]; 
+            if(mx >= el.x-50 && mx <= el.x+el.w+50 && my >= el.y-el.h-50 && my <= el.y+50) { 
+                dragKey = k; dOff = {x:mx-el.x, y:my-el.y}; return; 
+            } 
+        } 
+    }
 };
 window.onmousemove = e => {
     const r = canvas.getBoundingClientRect(), s = canvas.width/r.width, mx = (e.clientX-r.left)*s, my = (e.clientY-r.top)*s;
@@ -314,30 +479,56 @@ window.onmousemove = e => {
 };
 window.onmouseup = () => { dragKey = null; isP = isR = false; };
 canvas.onwheel = e => {
-    e.preventDefault(); const r = canvas.getBoundingClientRect(), s = canvas.width/r.width, mx = (e.clientX-r.left)*s, my = (e.clientY-r.top)*s;
-    let hit = false; for(let k in currentLayout) { let el = currentLayout[k]; if(mx >= el.x-50 && mx <= el.x+el.w+50 && my >= el.y-el.h-50 && my <= el.y+50) { currentLayout[k].size = Math.max(10, currentLayout[k].size + (e.deltaY>0?-3:3)); hit = true; break; } }
+    e.preventDefault(); 
+    const r = canvas.getBoundingClientRect(), s = canvas.width/r.width, mx = (e.clientX-r.left)*s, my = (e.clientY-r.top)*s;
+    let hit = false; 
+    for(let k in currentLayout) { 
+        let el = currentLayout[k]; 
+        if(mx >= el.x-50 && mx <= el.x+el.w+50 && my >= el.y-el.h-50 && my <= el.y+50) { 
+            currentLayout[k].size = Math.max(10, currentLayout[k].size + (e.deltaY>0?-3:3)); hit = true; break; 
+        } 
+    }
     if(!hit) bgTransform.scale = Math.max(0.1, bgTransform.scale + (e.deltaY>0?-0.05:0.05)); updatePreview();
 };
 
-document.getElementById("bgFile").onchange = e => {
-    const fr = new FileReader(); fr.onload = ev => { backgroundImage = new Image(); backgroundImage.onload = updatePreview; backgroundImage.src = ev.target.result; }; fr.readAsDataURL(e.target.files[0]);
-};
-
+// Export to PDF
 document.getElementById("generatePDF").onclick = () => {
-    if(qsoRecords.length === 0) return alert("No QSOs loaded!");
-    const { jsPDF } = window.jspdf; const doc = new jsPDF("l", "mm", "a4");
+    if(qsoRecords.length === 0) return alert("No contacts found in the current selection!");
+    const { jsPDF } = window.jspdf; 
+    const doc = new jsPDF("l", "mm", "a4");
+    
     qsoRecords.forEach((record, i) => {
         if(i > 0 && i % 4 === 0) doc.addPage();
         activeRecord = record; updatePreview();
         const x = 8.5 + (i%2)*140, y = 15 + Math.floor((i%4)/2)*90;
         doc.addImage(canvas.toDataURL("image/jpeg", 0.8), "JPEG", x, y, 140, 90);
     });
-    doc.save("WebQSLForge - PLEASE PRINT ME.pdf");
+    doc.save(`QSL_Forge_Batch_${new Date().toISOString().slice(0,10)}.pdf`);
 };
 
-document.getElementById("resetLayout").onclick = () => { currentLayout = JSON.parse(JSON.stringify(DEFAULT_LAYOUT)); updatePreview(); };
-document.querySelectorAll("input, select").forEach(el => el.oninput = () => setTimeout(updatePreview, 10));
-window.onload = () => { fetchPrefixData(); updatePreview(); };
+document.getElementById("bgFile").onchange = e => {
+    const fr = new FileReader(); 
+    fr.onload = ev => { backgroundImage = new Image(); backgroundImage.onload = updatePreview; backgroundImage.src = ev.target.result; }; 
+    fr.readAsDataURL(e.target.files[0]);
+};
+
+document.getElementById("resetLayout").onclick = () => { 
+    currentLayout = JSON.parse(JSON.stringify(DEFAULT_LAYOUT)); 
+    updatePreview(); 
+};
+
+// Real-time style updates
+document.querySelectorAll("input, select").forEach(el => {
+    if(!el.id.startsWith("filter") && el.id !== "sortBureau") {
+        el.oninput = () => setTimeout(updatePreview, 10);
+    }
+});
+
+// App Startup
+window.onload = () => { 
+    fetchPrefixData(); 
+    updatePreview(); 
+};
 </script>
 </body>
 </html>
